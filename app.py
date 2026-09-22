@@ -4,71 +4,86 @@ from PIL import Image
 # تنظیمات صفحه
 st.set_page_config(page_title="AFQ AI - Royal International AI Assistant", page_icon="👑", layout="centered")
 
-# استایل‌دهی پیشرفته، تری‌دی، برجسته و سازگار با حالت تاریک و روشن
+# استایل‌دهی حرفه‌ای، سه‌بعدی و سلطنتی (سبز و طلایی با گرادیانت‌های خیره‌کننده)
 st.markdown("""
     <style>
-    /* پس‌زمینه کلی و تنظیمات متن */
+    /* پس‌زمینه کلی و تنظیمات نمایشی */
     .stApp {
-        background-color: #0e1117;
+        background-color: #0b0f19;
         color: #ffffff;
     }
-    .main-container {
+    
+    /* کادر اصلی هدر با قاب و پس‌زمینه لوکس */
+    .royal-header-box {
+        background: linear-gradient(135deg, rgba(11, 102, 35, 0.25), rgba(212, 175, 55, 0.2));
+        border: 2px solid #d4af37;
+        border-radius: 20px;
+        padding: 25px 15px;
         text-align: center;
         direction: rtl;
-        padding: 10px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), inset 0 0 15px rgba(212, 175, 55, 0.2);
+        margin-bottom: 25px;
     }
-    /* عنوان برجسته طلاسی تری‌دی */
+
+    /* عنوان طلایی سه‌بعدی و گرادیانت */
     .main-ai {
-        font-size: 52px;
+        font-size: 54px;
         font-weight: 900;
-        color: #ffdf00;
+        background: linear-gradient(to bottom, #ffdf00, #b8860b);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
         margin-bottom: 0px;
-        text-shadow: 3px 3px 6px rgba(0,0,0,0.8), 0 0 25px rgba(255,215,0,0.5);
+        filter: drop-shadow(3px 3px 5px rgba(0,0,0,0.8));
         direction: ltr;
         unicode-bidi: embed;
     }
-    /* عنوان فارسی برجسته و واضح */
+
+    /* عنوان سبز سلطنتی گرادیانت */
     .main-title {
-        font-size: 30px;
+        font-size: 32px;
         font-weight: 800;
-        color: #00ff66;
+        background: linear-gradient(to bottom, #00ff66, #0b6623);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
         margin-top: 5px;
-        text-shadow: 2px 2px 5px rgba(0,0,0,0.8);
+        filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.8));
     }
-    /* زیرعنوان با نور و وضوح بالا برای حالت موبایل */
+
+    /* زیرعنوان‌های شیک و خوانا */
     .sub-title {
-        color: #f0f0f0;
-        font-size: 15px;
+        color: #f1f1f1;
+        font-size: 14px;
         font-weight: 600;
-        margin-top: 10px;
-        margin-bottom: 25px;
+        margin-top: 12px;
+        line-height: 1.7;
         text-shadow: 1px 1px 3px rgba(0,0,0,0.9);
-        line-height: 1.6;
     }
-    /* کادر پاورقی شیک و برجسته */
+
+    /* پاورقی لوکس و برجسته */
     .footer-box {
         text-align: center;
         margin-top: 40px;
         padding: 18px;
-        border: 2px solid #ffdf00;
+        border: 2px solid #d4af37;
         color: #ffffff;
-        font-size: 15px;
+        font-size: 14px;
         font-weight: bold;
-        background: linear-gradient(135deg, #1f1f1f, #2d2d2d);
+        background: linear-gradient(135deg, #111a14, #1a1a1a);
         border-radius: 12px;
         direction: rtl;
-        box-shadow: 0 4px 15px rgba(255,215,0,0.3);
+        box-shadow: 0 5px 20px rgba(212, 175, 55, 0.25);
     }
-    /* تنظیمات دکمه‌ها و عناصر متن برای خوانایی کامل */
+    
+    /* خوانایی کامل متن‌های عمومی */
     p, span, label, div {
         color: #ffffff !important;
     }
     </style>
 """, unsafe_allow_html=True)
 
-# عناوین منظم و دو زبانه با استایل برجسته HD
+# هدر و عناوین سلطنتی با دیزاین جدید
 st.markdown("""
-    <div class="main-container">
+    <div class="royal-header-box">
         <div class="main-ai">AFQ AI</div>
         <div class="main-title">هوش مصنوعی بین‌المللی AFQ</div>
         <div class="sub-title">
@@ -80,7 +95,7 @@ st.markdown("""
 
 st.divider()
 
-# دکمه پاک کردن تاریخچه چت با ظاهر جذاب
+# دکمه پاک کردن تاریخچه چت با استایل جذاب
 if st.button("🗑️ Clear Chat History / پاک کردن تاریخچه گفتگو"):
     st.session_state.messages = []
     st.rerun()

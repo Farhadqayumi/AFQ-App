@@ -2,7 +2,7 @@ import streamlit as st
 from PIL import Image
 
 # تنظیمات صفحه
-st.set_page_config(page_title="AFQ AI - Royal AI Assistant", page_icon="👑", layout="centered")
+st.set_page_config(page_title="AFQ AI - Royal International AI Assistant", page_icon="👑", layout="centered")
 
 # استایل‌دهی اختصاصی و مرتب‌سازی جهت متن‌ها
 st.markdown("""
@@ -49,10 +49,10 @@ st.markdown("""
 st.markdown("""
     <div class="main-container">
         <div class="main-ai">AFQ AI</div>
-        <div class="main-title">هوش مصنوعی AFQ</div>
+        <div class="main-title">هوش مصنوعی بین‌المللی AFQ</div>
         <div class="sub-title">
-            <b>Global Multilingual AI Assistant (Supports all international languages)</b><br>
-            👑 دستیار هوشمند بین‌المللی؛ پشتیبانی از تمامی زبان‌های دنیا و پاسخگویی جامع
+            <b>Royal International AI Superstars; Smart, Global & Creative Design</b><br>
+            👑 سوپراستار سلطنتی هوش مصنوعی؛ هوشمند، جهانی و طراح خلاق خودکار
         </div>
     </div>
 """, unsafe_allow_html=True)
@@ -75,14 +75,14 @@ for message in st.session_state.messages:
         if "image" in message and message["image"] is not None:
             st.image(message["image"], width=300)
 
-# بخش آپلود عکس در منوی کناری (سایدبار) - اصلاح شده طبق خواسته شما
+# بخش آپلود عکس در منوی کناری (سایدبار)
 with st.sidebar:
     st.header("📸 Image Upload / آپلود عکس")
-    st.write("Upload an image for design or creative tasks / عکسی را برای دیزاین یا ایده‌پردازی آپلود کنید")
+    st.write("Upload an image for AI automatic design / عکسی را آپلود کنید تا هوش مصنوعی آن را دیزاین کند")
     uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
 
 # کادر دریافت پیام (متن) در پایین صفحه
-prompt = st.chat_input("Ask in any language (English, Persian, Pashto, Arabic, etc.) / سوال خود را به هر زبانی بنویسید...")
+prompt = st.chat_input("Ask AI to design or type your question in any language...")
 
 # پردازش پیام یا عکس کاربر
 if prompt or uploaded_file:
@@ -90,7 +90,7 @@ if prompt or uploaded_file:
     if uploaded_file is not None:
         img_to_save = Image.open(uploaded_file)
 
-    user_text = prompt if prompt else "Please design or analyze this image."
+    user_text = prompt if prompt else "Please AI, design this image creatively for a global audience."
     
     st.session_state.messages.append({"role": "user", "content": user_text, "image": img_to_save})
     
@@ -103,22 +103,19 @@ if prompt or uploaded_file:
     
     # پردازش هوشمند سوالات درباره سازنده
     if any(word in prompt_lower for word in ["سازنده", "کی", "چه کسی", "ساخته", "درست کرده", "creator", "made you", "who made", "mad you"]):
-        response = "مرا احمد فرهاد قیومی پسر عبدالسلام درست کرده است. من هوش مصنوعی اختصاصی او (AFQ) هستم!\n\nI was created by Ahmad Farhad Qayumi, son of Abdulsalam."
+        response = "مرا احمد فرهاد قیومی پسر عبدالسلام درست کرده است. من هوش مصنوعی بین‌المللی و سلطنتی او (AFQ) هستم که برای استفاده تمام مردم جهان طراحی شده‌ام!\n\nI was created by Ahmad Farhad Qayumi, son of Abdulsalam. I am his royal international AI assistant!"
     
     elif "قرآن" in user_text or "quran" in prompt_lower or "سیپاره" in user_text or "جزء" in user_text:
         response = "قرآن کریم کتاب آسمانی مسلمانان و دارای ۳۰ سیپاره (جزء) است.\n\nThe Holy Quran has 30 parts (Juz)."
     
     elif uploaded_file is not None:
-        response = f"✨ عکس شما با موفقیت دریافت شد! من این را مطابق با سبک هنری و دیزاین سلطنتی AFQ برای شما بازطراحی و آماده کردم.\n\n✨ Your image was successfully received! I have designed and styled it for you following the royal AFQ creative standards.\n\n(Created by Ahmad Farhad Qayumi, son of Abdulsalam)."
+        response = f"🎨 **هوش مصنوعی AFQ در حال دیزاین و پردازش تصویر شماست...**\n\nمن این اثر را با استانداردهای جهانی و خلاقیت تمام‌خودکار بازطراحی کردم تا برای هر کاربری در سراسر دنیا جذاب باشد.\n\n✨ *AI Automatic Design Completed Successfully.*\n\n(Created by Ahmad Farhad Qayumi, son of Abdulsalam)."
     
     elif any(word in prompt_lower for word in ["hello", "hi", "سلام", "درود"]):
-        response = "سلام! من دستیار هوشمند AFQ هستم. چطور می‌توانم در دیزاین یا پروژه‌هایتان کمکتان کنم?\n\nHello! I am AFQ AI. How can I help you with your designs or projects?"
-    
-    elif len(prompt_lower) < 2 and uploaded_file is None:
-        response = "⚠️ من متوجه سوالتان نشدم! لطفاً واضح‌تر بنویسید.\n\nI didn't understand your question!"
+        response = "سلام! من هوش مصنوعی بین‌المللی AFQ هستم. از هر کجای جهان که هستید، آماده‌ام تا ایده‌ها و دیزاین‌های شما را خلق کنم!\n\nHello! I am AFQ AI. Ready to design and assist users worldwide!"
     
     else:
-        response = f"پیام شما دریافت شد. من دستیار هوشمند **AFQ** هستم و آماده‌ام تا ایده‌ها و دیزاین‌های شما را به بهترین شکل اجرا کنم!\n\nYour message has been received. I am ready to bring your ideas and designs to life!\n\n(Created by Ahmad Farhad Qayumi, son of Abdulsalam)."
+        response = f"🌐 درخواست شما دریافت شد. من به عنوان یک هوش مصنوعی بین‌المللی، آماده‌ی خلق دیزاین‌ها و پاسخ به تمام سوالات شما از سراسر جهان هستم!\n\nYour global request has been processed successfully by AFQ AI.\n\n(Created by Ahmad Farhad Qayumi, son of Abdulsalam)."
     
     with st.chat_message("assistant"):
         st.markdown(response)

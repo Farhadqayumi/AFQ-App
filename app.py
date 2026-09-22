@@ -4,7 +4,7 @@ from PIL import Image
 # تنظیمات صفحه
 st.set_page_config(page_title="AFQ AI", page_icon="👑", layout="centered")
 
-# استایل‌دهی اختصاصی (سبز زمردی، طلایی سلطنتی و فوتر ثابت در پایین)
+# استایل‌دهی اختصاصی (سبز زمردی و طلایی سلطنتی)
 st.markdown("""
     <style>
     .main-ai {
@@ -30,7 +30,7 @@ st.markdown("""
     }
     .footer-box {
         text-align: center;
-        margin-top: 50px;
+        margin-top: 40px;
         padding: 15px;
         border-top: 2px solid #d4af37;
         color: #555555;
@@ -48,16 +48,10 @@ st.markdown('<div class="sub-title">👑 سوپراستار سلطنتی هوش 
 
 st.divider()
 
-# بخش آپلود عکس
-st.subheader("📸 بخش تحلیل عکس و قیمت‌گذاری")
-uploaded_file = st.file_uploader("عکس مورد نظر خود را آپلود کنید...", type=["jpg", "jpeg", "png"])
-
-if uploaded_file is not None:
-    image = Image.open(uploaded_file)
-    st.image(image, caption="عکسی که شما آپلود کردید", use_column_width=True)
-    st.success("✅ عکس دریافت شد! در حال بررسی تصویر...")
-
-st.divider()
+# دکمه برای پاک کردن تاریخچه چت (برای حل مشکل پاک نشدن پیام‌ها)
+if st.button("🗑️ پاک کردن تاریخچه گفتگو (شروع مجدد)"):
+    st.session_state.messages = []
+    st.rerun()
 
 # راه‌اندازی تاریخچه پیام‌ها
 if "messages" not in st.session_state:
@@ -67,39 +61,58 @@ if "messages" not in st.session_state:
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
+        if "image" in message and message["image"] is not None:
+            st.image(message["image"], width=300)
 
-# کادر دریافت پیام
-if prompt := st.chat_input("سوال خود را به فارسی یا انگلیسی بنویسید..."):
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    with st.chat_message("user"):
-        st.markdown(prompt)
+# بخش سایدبار یا بالای صفحه برای آپلود عکس هم‌راستا با کادر
+with st.sidebar:
+    st.header("📸 آپلود تصویر و تحلیل")
+    uploaded_file = st.file_uploader("عکس خود را برای بررسی قیمت یا کالا انتخاب کنید...", type=["jpg", "jpeg", "png"])
 
-    prompt_lower = prompt.lower().strip()
+# کادر دریافت پیام (متن) در پایین صفحه
+prompt = st.chat_input("سوال خود را به فارسی یا انگلیسی بنویسید...")
+
+# اگر عکسی آپلود شده باشد یا پیامی نوشته شود
+if prompt or uploaded_file:
+    img_to_save = None
+    if uploaded_file is not None:
+        img_to_save = Image.open(uploaded_file)
+
+    # ساخت متن پیام کاربر
+    user_text = prompt if prompt else "لطفاً این عکس را بررسی کنید و مشخصات یا قیمت آن را بگویید."
     
-    # ۱. تشخیص سوالات درباره سازنده
+    st.session_state.messages.append({"role": "user", "content": user_text, "image": img_to_save})
+    
+    with st.chat_message("user"):
+        st.markdown(user_text)
+        if img_to_save:
+            st.image(img_to_save, width=300)
+
+    prompt_lower = user_text.lower().strip()
+    
+    # پردازش هوشمند پاسخ‌ها
     if any(word in prompt_lower for word in ["سازنده", "کی", "چه کسی", "ساخته", "درست کرده", "creator", "made you", "who made", "mad you", "how mad you"]):
         response = "مرا احمد فرهاد قیومی پسر عبدالسلام درست کرده است. من هوش مصنوعی اختصاصی او (AFQ) هستم!\n\nI was created by Ahmad Farhad Qayumi, son of Abdulsalam."
     
-    # ۲. سوالات قرآنی
-    elif "قرآن" in prompt or "quran" in prompt or "سیپاره" in prompt or "جزء" in prompt:
+    elif "قرآن" in user_text or "quran" in prompt_lower or "سیپاره" in user_text or "جزء" in user_text:
         response = "قرآن کریم کتاب آسمانی مسلمانان و دارای ۳۰ سیپاره (جزء) است. / The Holy Quran has 30 parts (Juz)."
     
-    # ۳. سلام و احوالپرسی
+    elif uploaded_file is not None:
+        response = "📸 عکس شما با موفقیت دریافت و بررسی شد! این تصویرالگوی مشخصی دارد و اطلاعات و قیمت آن ارزیابی گردید. \n\n(ساخته‌شده توسط احمد فرهاد قیومی پسر عبدالسلام)."
+    
     elif any(word in prompt_lower for word in ["hello", "hi", "سلام", "درود"]):
         response = "سلام! من دستیار هوشمند AFQ هستم (ساخته‌شده توسط احمد فرهاد قیومی پسر عبدالسلام). امروز چطور می‌توانم کمکتان کنم?"
     
-    # ۴. مدیریت سوالات نامفهوم یا کوتاه
-    elif len(prompt_lower) < 3 or prompt_lower in ["?", ".", "a", "s"]:
-        response = "⚠️ من متوجه سوالتان نشدم! لطفاً منظورتان را به صورت واضح‌تر بنویسید (مثلاً بپرسید: «تو را کی ساخته؟» یا «قرآن چند سیپاره است؟»)."
+    elif len(prompt_lower) < 3 and uploaded_file is None:
+        response = "⚠️ من متوجه سوالتان نشدم! لطفاً منظورتان را به صورت واضح‌تر بنویسید یا سوال خود را کامل‌تر مطرح کنید."
     
-    # ۵. پاسخ عمومی هوشمند
     else:
-        response = f"فرهاد عزیز، عبارت شما («{prompt}») دریافت شد. لطفاً سوال خود را در زمینه‌های علمی، ریاضی، حسابداری یا ترجمه دقیق‌تر مطرح کنید!\n\n(ساخته‌شده توسط احمد فرهاد قیومی پسر عبدالسلام)."
+        response = f"فرهاد عزیز، عبارت شما («{user_text}») دریافت شد. من دستیار هوشمند **AFQ** هستم و در کنار شما حضور دارم!\n\n(ساخته‌شده توسط احمد فرهاد قیومی پسر عبدالسلام)."
     
     with st.chat_message("assistant"):
         st.markdown(response)
     
-    st.session_state.messages.append({"role": "assistant", "content": response})
+    st.session_state.messages.append({"role": "assistant", "content": response, "image": None})
 
 # بخش پاورقی (فوتر) در انتهای صفحه به دو زبان
 st.markdown("""

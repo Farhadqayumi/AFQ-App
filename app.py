@@ -133,12 +133,15 @@ if prompt or uploaded_file:
 
     prompt_lower = user_text.lower().strip()
     
-    # منطق تولید پاسخ هوشمند
+    # منطق بروزرسانی شده و هوشمند پاسخ‌ها
     if any(word in prompt_lower for word in ["سازنده", "کی", "چه کسی", "ساخته", "درست کرده", "creator", "made you", "who made", "mad you"]):
         response = "مرا احمد فرهاد قیومی پسر عبدالسلام درست کرده است. من هوش مصنوعی بین‌المللی و سلطنتی او (AFQ) هستم که برای استفاده تمام مردم جهان طراحی شده‌ام!\n\nI was created by Ahmad Farhad Qayumi, son of Abdulsalam. I am his royal international AI assistant!"
     
-    elif "قرآن" in user_text or "quran" in prompt_lower or "سیپاره" in user_text or "جزء" in user_text:
-        response = "قرآن کریم کتاب آسمانی مسلمانان و دارای ۳۰ سیپاره (جزء) است.\n\nThe Holy Quran has 30 parts (Juz)."
+    elif any(word in prompt_lower for word in ["سوره", "سوره‌ها", "سورها", "surah", "surat"]):
+        response = "📖 قرآن کریم دارای **۱۱۴ سوره** مبارکه است (۸۶ سوره مکی و ۲۸ سوره مدنی).\n\nThe Holy Quran has **114 Surahs** (chapters)."
+    
+    elif any(word in prompt_lower for word in ["قرآن", "quran", "سیپاره", "سپاره", "جزء", "juz"]):
+        response = "📖 قرآن کریم کتاب آسمانی مسلمانان دارای **۳۰ سیپاره (جزء)** و **۱۱۴ سوره** است.\n\nThe Holy Quran has **30 parts (Juz)** and **114 Surahs**."
     
     elif uploaded_file is not None:
         response = f"🎨 **هوش مصنوعی AFQ در حال دیزاین و پردازش تصویر شماست...**\n\nمن این اثر را با استانداردهای جهانی و خلاقیت تمام‌خودکار بازطراحی کردم تا برای هر کاربری در سراسر دنیا جذاب باشد.\n\n✨ *AI Automatic Design Completed Successfully.*\n\n(Created by Ahmad Farhad Qayumi, son of Abdulsalam)."

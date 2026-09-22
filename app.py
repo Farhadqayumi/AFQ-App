@@ -31,6 +31,9 @@ st.markdown("""
         filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.8));
     }
     .sub-title { color: #f1f1f1 !important; font-size: 14px; font-weight: 600; margin-top: 12px; line-height: 1.7; text-shadow: 1px 1px 3px rgba(0,0,0,0.9); }
+    .chat-box-rtl {
+        direction: rtl; text-align: right; font-family: Tahoma, Arial, sans-serif; line-height: 1.8;
+    }
     .footer-box {
         text-align: center; margin-top: 40px; padding: 18px; border: 2px solid #d4af37; color: #ffffff;
         font-size: 14px; font-weight: bold; background: linear-gradient(135deg, #111a14, #1a1a1a);
@@ -62,10 +65,10 @@ if st.button("🗑️ پاک کردن تاریخچه گفتگو / Clear Chat His
     st.session_state.messages = []
     st.rerun()
 
-# نمایش پیام‌های قبلی چت همراه با دکمه اسپیکر صوتی
+# نمایش پیام‌های قبلی چت با جهت راست‌به‌راست
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
-        st.markdown(message["content"], unsafe_allow_html=True)
+        st.markdown(f'<div class="chat-box-rtl">{message["content"]}</div>', unsafe_allow_html=True)
         if "image" in message and message["image"] is not None:
             st.image(message["image"], width=300)
         if "audio_path" in message and message["audio_path"] and os.path.exists(message["audio_path"]):
@@ -92,7 +95,7 @@ if prompt or uploaded_file:
     st.session_state.messages.append({"role": "user", "content": user_text, "image": img_to_save, "audio_path": None})
     
     with st.chat_message("user"):
-        st.markdown(user_text)
+        st.markdown(f'<div class="chat-box-rtl">{user_text}</div>', unsafe_allow_html=True)
         if img_to_save:
             st.image(img_to_save, width=300)
 
@@ -134,8 +137,8 @@ if prompt or uploaded_file:
         except Exception:
             audio_file_path = None
 
-        # نمایش متن و عکس در چت
-        st.markdown(response, unsafe_allow_html=True)
+        # نمایش متن و عکس با فرمت راست‌به‌راست
+        st.markdown(f'<div class="chat-box-rtl">{response}</div>', unsafe_allow_html=True)
         if dynamic_image_url:
             st.image(dynamic_image_url, width=350)
             

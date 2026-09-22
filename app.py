@@ -1,6 +1,7 @@
 import streamlit as st
 from PIL import Image
 import urllib.parse
+from gtts import gTTS
 import os
 
 # --- تنظیمات صفحه و استایل سلطنتی ---
@@ -34,13 +35,7 @@ st.markdown("""
         font-size: 14px; font-weight: bold; background: linear-gradient(135deg, #111a14, #1a1a1a);
         border-radius: 12px; direction: rtl; box-shadow: 0 5px 20px rgba(212, 175, 55, 0.25);
     }
-    .quran-text {
-        font-family: 'Amiri', serif; font-size: 18px; line-height: 2.0; color: #e0e0e0;
-        text-align: right; direction: rtl; padding: 20px; background-color: rgba(255, 255, 255, 0.05);
-        border-radius: 10px; margin-top: 10px;
-    }
     </style>
-    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap" rel="stylesheet">
 """, unsafe_allow_html=True)
 
 # --- هدر و عناوین سلطنتی ---
@@ -50,7 +45,7 @@ st.markdown("""
         <div class="main-title">هوش مصنوعی بین‌المللی AFQ</div>
         <div class="sub-title">
             <b>Royal International AI Superstars; Smart, Global & Creative Design</b><br>
-            👑 سیستم جامع گفتگو، پاسخ به هر سوال و ارسال آنی هر عکسی که بخواهید
+            👑 سیستم هوشمند گفتگو، جستجوی عکس و قابلیت انتخاب خواندن متنی یا شنیدن با اسپیکر صوتی
         </div>
     </div>
 """, unsafe_allow_html=True)
@@ -66,20 +61,22 @@ if st.button("🗑️ پاک کردن تاریخچه گفتگو / Clear Chat His
     st.session_state.messages = []
     st.rerun()
 
-# نمایش پیام‌های قبلی چت
+# نمایش پیام‌های قبلی چت همراه با دکمه اسپیکر صوتی دستی
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"], unsafe_allow_html=True)
         if "image" in message and message["image"] is not None:
             st.image(message["image"], width=300)
+        if "audio_path" in message and message["audio_path"] and os.path.exists(message["audio_path"]):
+            st.audio(message["audio_path"], format="audio/mp3")
 
-# --- بخش آپلود عکس (سایدبار) ---
+# --- بخش سایدبار ---
 with st.sidebar:
-    st.header("📸 Image Upload / آپلود عکس")
+    st.header("📸 Image & Sound / امکانات")
     uploaded_file = st.file_uploader("عکسی برای تحلیل آپلود کنید...", type=["jpg", "jpeg", "png"])
     st.markdown("---")
     st.markdown("### درباره سیستم")
-    st.info("این ربات هوشمند توسط **احمد فرهاد قیومی پسر عبدالسلام** ساخته شده است تا به صورت بین‌المللی به کاربران خدمات ارائه دهد.")
+    st.info("این ربات هوشمند صوتی و متنی توسط احمد فرهاد قیومی پسر عبدالسلام ساخته شده است.")
 
 # --- کادر دریافت پیام (متن) در پایین صفحه ---
 prompt = st.chat_input("هر سوالی دارید بپرسید، یا بنویسید مثلاً 'عکس شیر' تا عاجل برایتان ارسال کنم...")
@@ -91,7 +88,7 @@ if prompt or uploaded_file:
         img_to_save = Image.open(uploaded_file)
 
     user_text = prompt if prompt else "توضیح این عکس"
-    st.session_state.messages.append({"role": "user", "content": user_text, "image": img_to_save})
+    st.session_state.messages.append({"role": "user", "content": user_text, "image": img_to_save, "audio_path": None})
     
     with st.chat_message("user"):
         st.markdown(user_text)
@@ -101,46 +98,53 @@ if prompt or uploaded_file:
     prompt_lower = user_text.lower().strip()
     
     with st.chat_message("assistant"):
-        with st.spinner("در حال پردازش و تفکر هوشمند..."):
+        with st.spinner("در حال پردازش پاسخ..."):
             response = ""
             dynamic_image_url = None
 
-            # ۱. بررسی درخواست ارسال عکس (هر عکسی که کاربر بخواهد)
+            # ۱. بررسی درخواست ارسال عکس
             if any(k in prompt_lower for k in ["عکس", "تصویر", "pic", "photo", "عکسا"]):
                 search_query = prompt_lower.replace("عکس", "").replace("تصویر", "").replace("را بفرست", "").replace("برام بفرست", "").replace("بفرست", "").strip()
                 if not search_query:
-                    search_query = "nature art"
+                    search_query = "nature"
                 
-                response = f"📸 این هم از تصویر درخواستی شما برای: **«{user_text}»**"
+                response = f"📸 این هم از تصویر درخواستی شما برای: **{user_text}**"
                 encoded_query = urllib.parse.quote(search_query)
-                # استفاده از سرویس تصاویر آنلاین برای نمایش آنی عکس بر اساس متن کاربر
                 dynamic_image_url = f"https://source.unsplash.com/featured/?{encoded_query}"
 
             # ۲. سوالات درباره سازنده
             elif any(word in prompt_lower for word in ["سازنده", "کی", "چه کسی", "ساخته", "درست کرده", "creator", "made you"]):
-                response = "مرا **احمد فرهاد قیومی پسر عبدالسلام** درست کرده است. من هوش مصنوعی بین‌المللی و سلطنتی او (**AFQ AI**) هستم و افتخار دارم که در خدمت شما باشم!\n\n*(Created by Ahmad Farhad Qayumi, son of Abdulsalam)*."
+                response = "مرا **احمد فرهاد قیومی پسر عبدالسلام** درست کرده است. من هوش مصنوعی بین‌المللی و سلطنتی او (**AFQ AI**) هستم!"
             
-            # ۳. خواندن سوره‌های قرآن کریم
+            # ۳. خواندن سوره‌های قرآن
             elif "سوره بقره" in prompt_lower or "بقره" in prompt_lower:
-                response = """📖 **متن سوره مبارکه بقره (آیات ۱ تا ۵):**<br><br>
-                    <div class="quran-text">
-                    بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ<br>
-                    الم (١)<br>
-                    ذَٰلِكَ الْكِتَابُ لَا رَيْبَ ۛ فِيهِ ۛ هُدًى لِلْمُتَّقِينَ (٢)<br>
-                    الَّذِينَ يُؤْمِنُونَ بِالْغَيْبِ وَيُقِيمُونَ الصَّلَاةَ وَمِمَّا رَزَقْنَاهُمْ يُنْفِيقُونَ (٣)<br>
-                    وَالَّذِينَ يُؤْمِنُونَ بِمَا أُنْزِلَ إِلَيْكَ وَمَا أُنْزِلَ مِنْ قَبْلِكَ وَبِالْآخِرَةِ هُمْ يُوقِنُونَ (٤)<br>
-                    أُولَٰئِكَ عَلَىٰٰ هُدًى مِنْ رَبِّهِمْ ۖ وَأُولَٰئِكَ هُمُ الْمُفْلِحُونَ (٥)
-                    </div><br>✨ *(Created by Ahmad Farhad Qayumi, son of Abdulsalam)*."
+                response = "📖 متن سوره مبارکه بقره (آیات ۱ تا ۵):\n\nبِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ\nالم (١)\nذَٰلِكَ الْكِتَابُ لَا رَيْبَ ۛ فِيهِ ۛ هُدًى لِلْمُتَّقِينَ (٢)"
             
-            # ۴. پاسخ جامع و هوشمند به هر سوال یا گپ آزاد دیگر
+            # ۴. پاسخ آزاد به هر سوال دیگر
             else:
-                response = f"💬 پیام و پرسش شما: «{user_text}»\n\nمن به عنوان هوش مصنوعی بین‌المللی **AFQ AI** آماده‌ام به هر سوالی در زمینه‌های مختلف (علمی، تکنالوژی، عمومی و...) پاسخ دهم و هر عکسی که اراده کنید را برایتان بیابم.\n\n*(Created by Ahmad Farhad Qayumi, son of Abdulsalam)*."
+                response = f"💬 پیام شما: {user_text}\n\nمن به عنوان هوش مصنوعی بین‌المللی AFQ آماده پاسخگویی به سوالات شما و ارسال هر عکسی هستم که بخواهید.\n\n(Created by Ahmad Farhad Qayumi, son of Abdulsalam)."
         
+        # تولید فایل صوتی برای اسپیکر (بدون پخش خودکار اجباری، تا کاربر خودش دکمه Play را بزند)
+        import uuid
+        audio_file_path = f"audio_{uuid.uuid4().hex[:6]}.mp3"
+        try:
+            clean_text = response.replace("*", "").replace("📸", "").replace("💬", "").replace("📖", "")
+            tts = gTTS(text=clean_text, lang='fa', slow=False)
+            tts.save(audio_file_path)
+        except Exception:
+            audio_file_path = None
+
+        # نمایش متن و عکس در چت
         st.markdown(response, unsafe_allow_html=True)
         if dynamic_image_url:
-            st.image(dynamic_image_url, width=400)
+            st.image(dynamic_image_url, width=350)
+            
+        # نمایش دکمه اسپیکر صوتی (کاربر هر وقت خواست روی دکمه پخش می‌زند تا بشنود)
+        if audio_file_path and os.path.exists(audio_file_path):
+            st.write("🔊 **برای شنیدن با صدای بلند، روی دکمه پخش اسپیکر زیر کلیک کنید:**")
+            st.audio(audio_file_path, format="audio/mp3")
     
-    st.session_state.messages.append({"role": "assistant", "content": response + (" [تصویر ارسال شد]" if dynamic_image_url else ""), "image": None})
+    st.session_state.messages.append({"role": "assistant", "content": response, "image": None, "audio_path": audio_file_path})
 
 # --- بخش پاورقی (فوتر) در انتهای صفحه ---
 st.markdown("""

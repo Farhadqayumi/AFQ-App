@@ -44,7 +44,7 @@ st.markdown("""
         <div class="main-title">هوش مصنوعی بین‌المللی AFQ</div>
         <div class="sub-title">
             <b>Royal International AI Superstars; Smart, Global & Creative Design</b><br>
-            👑 سوپراستار سلطنتی هوش مصنوعی؛ هوشمند، جهانی و طراح خلاق خودکار
+            👑 سوپراستار سلطنتی هوش مصنوعی؛ گپ آزاد، قرآن کریم و سیستم هوشمند ارسال تصاویر
         </div>
     </div>
 """, unsafe_allow_html=True)
@@ -56,7 +56,7 @@ if "messages" not in st.session_state:
     st.session_state.messages = []
 
 # دکمه پاک کردن تاریخچه چت
-if st.button("🗑️ Clear Chat History / پاک کردن تاریخچه گفتگو"):
+if st.button("🗑️ پاک کردن تاریخچه گفتگو / Clear Chat History"):
     st.session_state.messages = []
     st.rerun()
 
@@ -70,10 +70,10 @@ for message in st.session_state.messages:
 # --- بخش آپلود عکس (سایدبار) ---
 with st.sidebar:
     st.header("📸 Image Upload / آپلود عکس")
-    uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
+    uploaded_file = st.file_uploader("عکسی برای تحلیل یا دیزاین آپلود کنید...", type=["jpg", "jpeg", "png"])
 
 # --- کادر دریافت پیام (متن) در پایین صفحه ---
-prompt = st.chat_input("هر سوالی دارید بپرسید، متنی تایپ کنید، یا نام سوره را بنویسید...")
+prompt = st.chat_input("با من گپ بزنید، نام سوره را بنویسید، یا بگویید عکس چه چیزی را بفرستم (مثلاً عکس بادام)...")
 
 # --- پردازش هوشمند پیام یا عکس کاربر ---
 if prompt or uploaded_file:
@@ -81,7 +81,7 @@ if prompt or uploaded_file:
     if uploaded_file is not None:
         img_to_save = Image.open(uploaded_file)
 
-    user_text = prompt if prompt else "Please analyze this image."
+    user_text = prompt if prompt else "توضیح این عکس"
     st.session_state.messages.append({"role": "user", "content": user_text, "image": img_to_save})
     
     with st.chat_message("user"):
@@ -93,11 +93,26 @@ if prompt or uploaded_file:
     
     with st.chat_message("assistant"):
         with st.spinner("در حال پردازش هوشمند..."):
-            # پاسخ‌های اتوماتیک و هوشمند پیشرفته بدون نیاز به کتابخانه بیرونی
-            if any(word in prompt_lower for word in ["سازنده", "کی", "چه کسی", "ساخته", "درست کرده", "creator", "made you"]):
-                response = "مرا احمد فرهاد قیومی پسر عبدالسلام درست کرده است. من هوش مصنوعی بین‌المللی و سلطنتی او (AFQ) هستم!\n\n(Created by Ahmad Farhad Qayumi, son of Abdulsalam)."
+            response = ""
+            image_url_to_display = None
+
+            # ۱. قابلیت درخواست عکس (مثل بادام، پسته و غیره)
+            if "عکس بادام" in prompt_lower or "بادام" in prompt_lower and "عکس" in prompt_lower:
+                response = "🥜 این هم از عکس بادام باکیفیت و تازه برای شما:"
+                image_url_to_display = "https://images.unsplash.com/photo-1508061253366-f7da15bbf6d4?w=500"
+            elif "عکس پسته" in prompt_lower or "پسته" in prompt_lower and "عکس" in prompt_lower:
+                response = "🟢 این هم از عکس پسته اعلا و خوشمزه:"
+                image_url_to_display = "https://images.unsplash.com/photo-1536256263959-770b48d82b0a?w=500"
+            elif "عکس سیب" in prompt_lower or "سیب" in prompt_lower and "عکس" in prompt_lower:
+                response = "🍎 این هم از عکس سیب سرخ و آبدار:"
+                image_url_to_display = "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=500"
             
-            elif any(word in prompt_lower for word in ["سوره بقره", "بقره", "surah baqarah"]):
+            # ۲. سوالات درباره سازنده
+            elif any(word in prompt_lower for word in ["سازنده", "کی", "چه کسی", "ساخته", "درست کرده", "creator", "made you"]):
+                response = "مرا احمد فرهاد قیومی پسر عبدالسلام درست کرده است. من هوش مصنوعی بین‌المللی و سلطنتی او (AFQ) هستم و آماده‌ام با تمام مردم دنیا گپ بزنم و کمک‌شان کنم!\n\n(Created by Ahmad Farhad Qayumi, son of Abdulsalam)."
+            
+            # ۳. خواندن سوره بقره یا سوره‌های دیگر
+            elif "سوره بقره" in prompt_lower or "بقره" in prompt_lower:
                 response = """📖 **متن سوره مبارکه بقره (آیات ۱ تا ۵):**<br><br>
                     <div class="quran-text">
                     بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ<br>
@@ -108,18 +123,29 @@ if prompt or uploaded_file:
                     أُولَٰئِكَ عَلَىٰٰ هُدًى مِنْ رَبِّهِمْ ۖ وَأُولَٰئِكَ هُمُ الْمُفْلِحُونَ (٥)
                     </div><br>✨ (Created by Ahmad Farhad Qayumi, son of Abdulsalam)."""
             
-            elif any(word in prompt_lower for word in ["سوره", "سوره‌ها", "سورها", "surah"]):
-                response = "📖 قرآن کریم دارای **۱۱۴ سوره** مبارکه است (۸۶ سوره مکی و ۲۸ سوره مدنی).\n\nThe Holy Quran has **114 Surahs**."
+            elif "سوره اخلاص" in prompt_lower or "قل هو الله" in prompt_lower:
+                response = """📖 **سوره مبارکه اخلاص (قل هو الله احد):**<br><br>
+                    <div class="quran-text">
+                    بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ<br>
+                    قُلْ هُوَ اللَّهُ أَحَدٌ (١)<br>
+                    اللَّهُ الصَّمَدُ (٢)<br>
+                    لَمْ يَلِدْ وَلَمْ يُولَدْ (۳)<br>
+                    وَلَمْ يَكُنْ لَهُ كُفُوًا أَحَدٌ (٤)
+                    </div><br>✨ (Created by Ahmad Farhad Qayumi, son of Abdulsalam)."""
             
-            elif any(word in prompt_lower for word in ["سلام", "hello", "hi", "درود"]):
-                response = "سلام! من هوش مصنوعی سلطنتی AFQ هستم. امروز چه کمکی از دست من برای شما برمی‌آید؟\n\nHello! I am AFQ AI assistant."
+            # ۴. گپ آزاد با مردم (سلام، احوالپرسی و گفتگو)
+            elif any(word in prompt_lower for word in ["سلام", "درود", "خوبی", "چطوری", "hello", "hi"]):
+                response = "سلام! در خدمتم. چطور می‌توانم کمکتان کنم؟ امروز درباره چه موضوعی دوست دارید با هم گپ بزنیم؟ 😊"
             
+            # ۵. پاسخ عمومی هوشمند برای بقیه گپ‌ها و سوالات
             else:
-                response = f"🌐 درخواست هوشمند شما دریافت و پردازش شد: «{user_text}»\n\nسیستم اتوماتیک AFQ AI آماده پاسخگویی به تمام ایده‌ها و سوالات شماست.\n\n(Created by Ahmad Farhad Qayumi, son of Abdulsalam)."
+                response = f"💬 پیام شما دریافت شد: «{user_text}»\n\nمن به عنوان هوش مصنوعی سلطنتی AFQ آماده‌ی گفتگو، پاسخ به سوالات دینی، علمی و ارسال تصاویر دلخواه شما هستم!\n\n(Created by Ahmad Farhad Qayumi, son of Abdulsalam)."
         
         st.markdown(response, unsafe_allow_html=True)
+        if image_url_to_display:
+            st.image(image_url_to_display, width=350)
     
-    st.session_state.messages.append({"role": "assistant", "content": response, "image": None})
+    st.session_state.messages.append({"role": "assistant", "content": response + (" [تصویر ارسال شد]" if image_url_to_display else ""), "image": None})
 
 # --- بخش پاورقی (فوتر) در انتهای صفحه ---
 st.markdown("""

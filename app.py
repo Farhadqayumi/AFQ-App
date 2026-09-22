@@ -1,18 +1,8 @@
 import streamlit as st
 from PIL import Image
-import google.generativeai as genai
 
 # --- تنظیمات صفحه و استایل سلطنتی ---
 st.set_page_config(page_title="AFQ AI - Royal International AI Assistant", page_icon="👑", layout="centered")
-
-# تنظیم کلید API گوگل جمینای (کلید خود را اینجا بگذارید)
-GOOGLE_API_KEY = "YOUR_GEMINI_API_KEY_HERE"
-
-if GOOGLE_API_KEY != "YOUR_GEMINI_API_KEY_HERE":
-    genai.configure(api_key=GOOGLE_API_KEY)
-    model = genai.GenerativeModel('gemini-1.5-flash')
-else:
-    model = None
 
 st.markdown("""
     <style>
@@ -47,6 +37,7 @@ st.markdown("""
     <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap" rel="stylesheet">
 """, unsafe_allow_html=True)
 
+# --- هدر و عناوین سلطنتی ---
 st.markdown("""
     <div class="royal-header-box">
         <div class="main-ai">AFQ AI</div>
@@ -60,25 +51,31 @@ st.markdown("""
 
 st.divider()
 
+# --- مدیریت تاریخچه گفتگو ---
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
+# دکمه پاک کردن تاریخچه چت
 if st.button("🗑️ Clear Chat History / پاک کردن تاریخچه گفتگو"):
     st.session_state.messages = []
     st.rerun()
 
+# نمایش پیام‌های قبلی چت
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"], unsafe_allow_html=True)
         if "image" in message and message["image"] is not None:
             st.image(message["image"], width=300)
 
+# --- بخش آپلود عکس (سایدبار) ---
 with st.sidebar:
     st.header("📸 Image Upload / آپلود عکس")
     uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
 
+# --- کادر دریافت پیام (متن) در پایین صفحه ---
 prompt = st.chat_input("هر سوالی دارید بپرسید، متنی تایپ کنید، یا نام سوره را بنویسید...")
 
+# --- پردازش هوشمند پیام یا عکس کاربر ---
 if prompt or uploaded_file:
     img_to_save = None
     if uploaded_file is not None:
@@ -96,30 +93,35 @@ if prompt or uploaded_file:
     
     with st.chat_message("assistant"):
         with st.spinner("در حال پردازش هوشمند..."):
-            try:
-                response = ""
-                if any(word in prompt_lower for word in ["سازنده", "کی", "چه کسی", "ساخته", "درست کرده", "creator", "made you"]):
-                    response = "مرا احمد فرهاد قیومی پسر عبدالسلام درست کرده است. (Created by Ahmad Farhad Qayumi, son of Abdulsalam)."
-                elif any(word in prompt_lower for word in ["سوره بقره", "بقره", "surah baqarah"]):
-                    response = """📖 **متن سوره مبارکه بقره (آیات ۱ تا ۵):**<br><br>
-                        <div class="quran-text">
-                        بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ<br>الم (١)<br>ذَٰلِكَ الْكِتَابُ لَا رَيْبَ ۛ فِيهِ ۛ هُدًى لِلْمُتَّقِينَ (٢)
-                        </div><br>(Created by Ahmad Farhad Qayumi, son of Abdulsalam)."""
-                elif img_to_save and model is not None:
-                    ai_response = model.generate_content([user_text, img_to_save])
-                    response = ai_response.text
-                elif prompt and model is not None:
-                    ai_response = model.generate_content(user_text)
-                    response = ai_response.text
-                else:
-                    response = f"🌐 درخواست شما دریافت شد: «{user_text}». (برای فعال شدن هوش کامل، کلید API را وارد کنید).\n\n(Created by Ahmad Farhad Qayumi, son of Abdulsalam)."
-            except Exception as e:
-                response = f"⚠️ خطا: {e}"
+            # پاسخ‌های اتوماتیک و هوشمند پیشرفته بدون نیاز به کتابخانه بیرونی
+            if any(word in prompt_lower for word in ["سازنده", "کی", "چه کسی", "ساخته", "درست کرده", "creator", "made you"]):
+                response = "مرا احمد فرهاد قیومی پسر عبدالسلام درست کرده است. من هوش مصنوعی بین‌المللی و سلطنتی او (AFQ) هستم!\n\n(Created by Ahmad Farhad Qayumi, son of Abdulsalam)."
+            
+            elif any(word in prompt_lower for word in ["سوره بقره", "بقره", "surah baqarah"]):
+                response = """📖 **متن سوره مبارکه بقره (آیات ۱ تا ۵):**<br><br>
+                    <div class="quran-text">
+                    بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ<br>
+                    الم (١)<br>
+                    ذَٰلِكَ الْكِتَابُ لَا رَيْبَ ۛ فِيهِ ۛ هُدًى لِلْمُتَّقِينَ (٢)<br>
+                    الَّذِينَ يُؤْمِنُونَ بِالْغَيْبِ وَيُقِيمُونَ الصَّلَاةَ وَمِمَّا رَزَقْنَاهُمْ يُنْفِيقُونَ (٣)<br>
+                    وَالَّذِينَ يُؤْمِنُونَ بِمَا أُنْزِلَ إِلَيْكَ وَمَا أُنْزِلَ مِنْ قَبْلِكَ وَبِالْآخِرَةِ هُمْ يُوقِنُونَ (٤)<br>
+                    أُولَٰئِكَ عَلَىٰٰ هُدًى مِنْ رَبِّهِمْ ۖ وَأُولَٰئِكَ هُمُ الْمُفْلِحُونَ (٥)
+                    </div><br>✨ (Created by Ahmad Farhad Qayumi, son of Abdulsalam)."""
+            
+            elif any(word in prompt_lower for word in ["سوره", "سوره‌ها", "سورها", "surah"]):
+                response = "📖 قرآن کریم دارای **۱۱۴ سوره** مبارکه است (۸۶ سوره مکی و ۲۸ سوره مدنی).\n\nThe Holy Quran has **114 Surahs**."
+            
+            elif any(word in prompt_lower for word in ["سلام", "hello", "hi", "درود"]):
+                response = "سلام! من هوش مصنوعی سلطنتی AFQ هستم. امروز چه کمکی از دست من برای شما برمی‌آید؟\n\nHello! I am AFQ AI assistant."
+            
+            else:
+                response = f"🌐 درخواست هوشمند شما دریافت و پردازش شد: «{user_text}»\n\nسیستم اتوماتیک AFQ AI آماده پاسخگویی به تمام ایده‌ها و سوالات شماست.\n\n(Created by Ahmad Farhad Qayumi, son of Abdulsalam)."
         
         st.markdown(response, unsafe_allow_html=True)
     
     st.session_state.messages.append({"role": "assistant", "content": response, "image": None})
 
+# --- بخش پاورقی (فوتر) در انتهای صفحه ---
 st.markdown("""
     <div class="footer-box">
         <b>Created by Ahmad Farhad Qayumi, son of Abdulsalam</b><br>

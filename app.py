@@ -60,12 +60,10 @@ st.divider()
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# دکمه پاک کردن تاریخچه چت
 if st.button("🗑️ پاک کردن تاریخچه گفتگو / Clear Chat History"):
     st.session_state.messages = []
     st.rerun()
 
-# نمایش پیام‌های قبلی چت با جهت راست‌به‌راست
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(f'<div class="chat-box-rtl">{message["content"]}</div>', unsafe_allow_html=True)
@@ -74,7 +72,6 @@ for message in st.session_state.messages:
         if "audio_path" in message and message["audio_path"] and os.path.exists(message["audio_path"]):
             st.audio(message["audio_path"], format="audio/mp3")
 
-# --- بخش سایدبار ---
 with st.sidebar:
     st.header("📸 Image & Sound / امکانات")
     uploaded_file = st.file_uploader("عکسی برای تحلیل آپلود کنید...", type=["jpg", "jpeg", "png"])
@@ -82,10 +79,8 @@ with st.sidebar:
     st.markdown("### درباره سیستم")
     st.info("این ربات هوشمند صوتی و متنی توسط احمد فرهاد قیومی پسر عبدالسلام ساخته شده است.")
 
-# --- کادر دریافت پیام (متن) در پایین صفحه ---
-prompt = st.chat_input("هر سوالی دارید بپرسید، یا بنویسید مثلاً 'عکس شیر' تا عاجل برایتان ارسال کنم...")
+prompt = st.chat_input("هر سوالی دارید بپرسید، یا بنویسید مثلاً 'سوره فاتحه' یا 'عکس شیر'...")
 
-# --- پردازش هوشمند پیام یا عکس کاربر ---
 if prompt or uploaded_file:
     img_to_save = None
     if uploaded_file is not None:
@@ -106,12 +101,11 @@ if prompt or uploaded_file:
             response = ""
             dynamic_image_url = None
 
-            # ۱. بررسی درخواست ارسال عکس
+            # ۱. درخواست عکس
             if any(k in prompt_lower for k in ["عکس", "تصویر", "pic", "photo", "عکسا"]):
                 search_query = prompt_lower.replace("عکس", "").replace("تصویر", "").replace("را بفرست", "").replace("برام بفرست", "").replace("بفرست", "").strip()
                 if not search_query:
                     search_query = "nature"
-                
                 response = f"📸 این هم از تصویر درخواستی شما برای: **{user_text}**"
                 encoded_query = urllib.parse.quote(search_query)
                 dynamic_image_url = f"https://source.unsplash.com/featured/?{encoded_query}"
@@ -120,15 +114,19 @@ if prompt or uploaded_file:
             elif any(word in prompt_lower for word in ["سازنده", "کی", "چه کسی", "ساخته", "درست کرده", "creator", "made you"]):
                 response = "مرا **احمد فرهاد قیومی پسر عبدالسلام** درست کرده است. من هوش مصنوعی بین‌المللی و سلطنتی او (**AFQ AI**) هستم!"
             
-            # ۳. خواندن سوره‌های قرآن
-            elif "سوره بقره" in prompt_lower or "بقره" in prompt_lower:
+            # ۳. سوره فاتحه
+            elif "فاتحه" in prompt_lower:
+                response = "📖 متن سوره مبارکه فاتحه:\n\nبِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ (۱) الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ (۲) الرَّحْمَٰنِ الرَّحِيمِ (۳) مَالِكِ يَوْمِ الدِّينِ (۴) إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ (۵) اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ (۶) صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ وَلَا الضَّالِّينَ (۷)"
+
+            # ۴. سوره بقره
+            elif "بقره" in prompt_lower:
                 response = "📖 متن سوره مبارکه بقره (آیات ۱ تا ۵):\n\nبِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ\nالم (١)\nذَٰلِكَ الْكِتَابُ لَا رَيْبَ ۛ فِيهِ ۛ هُدًى لِلْمُتَّقِينَ (٢)"
             
-            # ۴. پاسخ آزاد به هر سوال دیگر
+            # ۵. پاسخ عمومی هوشمند
             else:
-                response = f"💬 پیام شما: {user_text}\n\nمن به عنوان هوش مصنوعی بین‌المللی AFQ آماده پاسخگویی به سوالات شما و ارسال هر عکسی هستم که بخواهید.\n\n(Created by Ahmad Farhad Qayumi, son of Abdulsalam)."
+                response = f"💬 پاسخ هوشمند به پرسش شما ('{user_text}'):\n\nمن به عنوان هوش مصنوعی بین‌المللی AFQ آماده‌ی پاسخگویی هستم. شما می‌توانید درخواست عکس، متن‌های مذهبی یا هر سوال دیگری را بپرسید.\n\n(Created by Ahmad Farhad Qayumi, son of Abdulsalam)."
         
-        # تولید فایل صوتی برای اسپیکر
+        # تولید صدا برای اسپیکر
         audio_file_path = f"audio_{uuid.uuid4().hex[:6]}.mp3"
         try:
             clean_text = response.replace("*", "").replace("📸", "").replace("💬", "").replace("📖", "")
@@ -137,19 +135,16 @@ if prompt or uploaded_file:
         except Exception:
             audio_file_path = None
 
-        # نمایش متن و عکس با فرمت راست‌به‌راست
         st.markdown(f'<div class="chat-box-rtl">{response}</div>', unsafe_allow_html=True)
         if dynamic_image_url:
             st.image(dynamic_image_url, width=350)
             
-        # نمایش دکمه اسپیکر صوتی
         if audio_file_path and os.path.exists(audio_file_path):
             st.write("🔊 **برای شنیدن با صدای بلند، روی دکمه پخش اسپیکر زیر کلیک کنید:**")
             st.audio(audio_file_path, format="audio/mp3")
     
     st.session_state.messages.append({"role": "assistant", "content": response, "image": None, "audio_path": audio_file_path})
 
-# --- بخش پاورقی (فوتر) در انتهای صفحه ---
 st.markdown("""
     <div class="footer-box">
         <b>Created by Ahmad Farhad Qayumi, son of Abdulsalam</b><br>

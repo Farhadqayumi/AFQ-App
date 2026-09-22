@@ -1,9 +1,14 @@
 import streamlit as st
 from PIL import Image
 import urllib.parse
+import os
 
 # --- تنظیمات صفحه و استایل سلطنتی ---
-st.set_page_config(page_title="AFQ AI - Royal International AI Assistant", page_icon="👑", layout="centered")
+st.set_page_config(
+    page_title="AFQ AI - Royal International AI Assistant", 
+    page_icon="👑", 
+    layout="centered"
+)
 
 st.markdown("""
     <style>
@@ -72,6 +77,9 @@ for message in st.session_state.messages:
 with st.sidebar:
     st.header("📸 Image Upload / آپلود عکس")
     uploaded_file = st.file_uploader("عکسی برای تحلیل آپلود کنید...", type=["jpg", "jpeg", "png"])
+    st.markdown("---")
+    st.markdown("### درباره سیستم")
+    st.info("این ربات هوشمند توسط **احمد فرهاد قیومی پسر عبدالسلام** ساخته شده است تا به صورت بین‌المللی به کاربران خدمات ارائه دهد.")
 
 # --- کادر دریافت پیام (متن) در پایین صفحه ---
 prompt = st.chat_input("هر سوالی دارید بپرسید، یا بنویسید مثلاً 'عکس شیر' تا عاجل برایتان ارسال کنم...")
@@ -93,27 +101,26 @@ if prompt or uploaded_file:
     prompt_lower = user_text.lower().strip()
     
     with st.chat_message("assistant"):
-        with st.spinner("در حال پردازش و آماده‌سازی..."):
+        with st.spinner("در حال پردازش و تفکر هوشمند..."):
             response = ""
             dynamic_image_url = None
 
-            # بررسی اینکه آیا کاربر درخواست ارسال عکس کرده است یا خیر
-            if "عکس" in prompt_lower or "تصویر" in prompt_lower or "pic" in prompt_lower or "photo" in prompt_lower:
-                # استخراج کلمه کلیدی برای جستجوی عکس (مثلا از "عکس شیر" کلمه شیر در می آید)
-                search_query = prompt_lower.replace("عکس", "").replace("تصویر", "").replace("را بفرست", "").replace("برام بفرست", "").strip()
+            # ۱. بررسی درخواست ارسال عکس (هر عکسی که کاربر بخواهد)
+            if any(k in prompt_lower for k in ["عکس", "تصویر", "pic", "photo", "عکسا"]):
+                search_query = prompt_lower.replace("عکس", "").replace("تصویر", "").replace("را بفرست", "").replace("برام بفرست", "").replace("بفرست", "").strip()
                 if not search_query:
-                    search_query = "nature"
+                    search_query = "nature art"
                 
-                response = f"📸 این هم از درخواست شما برای «{user_text}»:"
-                # استفاده از موتور تولید و جستجوی آنلاین عکس بر اساس متن دلخواه کاربر
+                response = f"📸 این هم از تصویر درخواستی شما برای: **«{user_text}»**"
                 encoded_query = urllib.parse.quote(search_query)
+                # استفاده از سرویس تصاویر آنلاین برای نمایش آنی عکس بر اساس متن کاربر
                 dynamic_image_url = f"https://source.unsplash.com/featured/?{encoded_query}"
 
-            # سوالات درباره سازنده
+            # ۲. سوالات درباره سازنده
             elif any(word in prompt_lower for word in ["سازنده", "کی", "چه کسی", "ساخته", "درست کرده", "creator", "made you"]):
-                response = "مرا احمد فرهاد قیومی پسر عبدالسلام درست کرده است. من هوش مصنوعی بین‌المللی و سلطنتی او (AFQ) هستم!\n\n(Created by Ahmad Farhad Qayumi, son of Abdulsalam)."
+                response = "مرا **احمد فرهاد قیومی پسر عبدالسلام** درست کرده است. من هوش مصنوعی بین‌المللی و سلطنتی او (**AFQ AI**) هستم و افتخار دارم که در خدمت شما باشم!\n\n*(Created by Ahmad Farhad Qayumi, son of Abdulsalam)*."
             
-            # خواندن سوره‌های قرآن
+            # ۳. خواندن سوره‌های قرآن کریم
             elif "سوره بقره" in prompt_lower or "بقره" in prompt_lower:
                 response = """📖 **متن سوره مبارکه بقره (آیات ۱ تا ۵):**<br><br>
                     <div class="quran-text">
@@ -123,15 +130,15 @@ if prompt or uploaded_file:
                     الَّذِينَ يُؤْمِنُونَ بِالْغَيْبِ وَيُقِيمُونَ الصَّلَاةَ وَمِمَّا رَزَقْنَاهُمْ يُنْفِيقُونَ (٣)<br>
                     وَالَّذِينَ يُؤْمِنُونَ بِمَا أُنْزِلَ إِلَيْكَ وَمَا أُنْزِلَ مِنْ قَبْلِكَ وَبِالْآخِرَةِ هُمْ يُوقِنُونَ (٤)<br>
                     أُولَٰئِكَ عَلَىٰٰ هُدًى مِنْ رَبِّهِمْ ۖ وَأُولَٰئِكَ هُمُ الْمُفْلِحُونَ (٥)
-                    </div><br>✨ (Created by Ahmad Farhad Qayumi, son of Abdulsalam)."""
+                    </div><br>✨ *(Created by Ahmad Farhad Qayumi, son of Abdulsalam)*."
             
-            # گپ آزاد و پاسخ به هر سوال عمومی دیگر
+            # ۴. پاسخ جامع و هوشمند به هر سوال یا گپ آزاد دیگر
             else:
-                response = f"💬 سوال یا پیام شما: «{user_text}»\n\nمن به عنوان هوش مصنوعی بین‌المللی AFQ آماده‌ام به تمام سوالات شما پاسخ دهم و هر عکسی که بخواهید را برایتان آماده کنم!\n\n(Created by Ahmad Farhad Qayumi, son of Abdulsalam)."
+                response = f"💬 پیام و پرسش شما: «{user_text}»\n\nمن به عنوان هوش مصنوعی بین‌المللی **AFQ AI** آماده‌ام به هر سوالی در زمینه‌های مختلف (علمی، تکنالوژی، عمومی و...) پاسخ دهم و هر عکسی که اراده کنید را برایتان بیابم.\n\n*(Created by Ahmad Farhad Qayumi, son of Abdulsalam)*."
         
         st.markdown(response, unsafe_allow_html=True)
         if dynamic_image_url:
-            st.image(dynamic_image_url, width=350)
+            st.image(dynamic_image_url, width=400)
     
     st.session_state.messages.append({"role": "assistant", "content": response + (" [تصویر ارسال شد]" if dynamic_image_url else ""), "image": None})
 

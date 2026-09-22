@@ -51,7 +51,7 @@ st.markdown("""
 
     /* زیرعنوان‌های شیک و خوانا */
     .sub-title {
-        color: #f1f1f1;
+        color: #f1f1f1 !important;
         font-size: 14px;
         font-weight: 600;
         margin-top: 12px;
@@ -73,11 +73,6 @@ st.markdown("""
         direction: rtl;
         box-shadow: 0 5px 20px rgba(212, 175, 55, 0.25);
     }
-    
-    /* خوانایی کامل متن‌های عمومی */
-    p, span, label, div {
-        color: #ffffff !important;
-    }
     </style>
 """, unsafe_allow_html=True)
 
@@ -95,14 +90,14 @@ st.markdown("""
 
 st.divider()
 
-# دکمه پاک کردن تاریخچه چت با استایل جذاب
+# راه‌اندازی تاریخچه پیام‌ها قبل از استفاده
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+
+# دکمه پاک کردن تاریخچه چت
 if st.button("🗑️ Clear Chat History / پاک کردن تاریخچه گفتگو"):
     st.session_state.messages = []
     st.rerun()
-
-# راه‌اندازی تاریخچه پیام‌ها
-if "messages" not in st.session_state:
-    st.session_state.messages = []
 
 # نمایش پیام‌های قبلی چت
 for message in st.session_state.messages:
@@ -128,6 +123,7 @@ if prompt or uploaded_file:
 
     user_text = prompt if prompt else "Please AI, design this image creatively for a global audience."
     
+    # ثبت پیام کاربر در حافظه
     st.session_state.messages.append({"role": "user", "content": user_text, "image": img_to_save})
     
     with st.chat_message("user"):
@@ -137,7 +133,7 @@ if prompt or uploaded_file:
 
     prompt_lower = user_text.lower().strip()
     
-    # پردازش هوشمند سوالات درباره سازنده
+    # منطق تولید پاسخ هوشمند
     if any(word in prompt_lower for word in ["سازنده", "کی", "چه کسی", "ساخته", "درست کرده", "creator", "made you", "who made", "mad you"]):
         response = "مرا احمد فرهاد قیومی پسر عبدالسلام درست کرده است. من هوش مصنوعی بین‌المللی و سلطنتی او (AFQ) هستم که برای استفاده تمام مردم جهان طراحی شده‌ام!\n\nI was created by Ahmad Farhad Qayumi, son of Abdulsalam. I am his royal international AI assistant!"
     
@@ -151,8 +147,9 @@ if prompt or uploaded_file:
         response = "سلام! من هوش مصنوعی بین‌المللی AFQ هستم. از هر کجای جهان که هستید، آماده‌ام تا ایده‌ها و دیزاین‌های شما را خلق کنم!\n\nHello! I am AFQ AI. Ready to design and assist users worldwide!"
     
     else:
-        response = f"🌐 درخواست شما دریافت شد. من به عنوان یک هوش مصنوعی بین‌المللی، آماده‌ی خلق دیزاین‌ها و پاسخ به تمام سوالات شما از سراسر جهان هستم!\n\nYour global request has been processed successfully by AFQ AI.\n\n(Created by Ahmad Farhad Qayumi, son of Abdulsalam)."
+        response = f"🌐 درخواست شما دریافت شد: «{user_text}». من به عنوان یک هوش مصنوعی بین‌المللی، آماده‌ی پاسخ به تمام سوالات و اجرای درخواست‌های شما از سراسر جهان هستم!\n\nYour global request has been processed successfully by AFQ AI.\n\n(Created by Ahmad Farhad Qayumi, son of Abdulsalam)."
     
+    # نمایش و ذخیره پاسخ دستیار
     with st.chat_message("assistant"):
         st.markdown(response)
     
